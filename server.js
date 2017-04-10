@@ -46,19 +46,45 @@ app.post('/todos', function (req,res) {
     res.json(body);
 });
 
-//GET /todos/:id
+//DELETE /todos/:id
 app.delete('/todos/:id', function(req,res){
     var todoId = parseInt(req.params.id, 10);
     var matchedTodo = _.findWhere(todos, {id: todoId});
 
     if (!matchedTodo){
-        res.status(404).json({"error":"no todo item found with that ID"});
+        res.status(404).json({"error":"no todo item found with that id"});
     } else {
         todos = _.without(todos, matchedTodo);
         //todos.splice(todoId-1, 1);
         res.json(matchedTodo);        
     }
 })
+
+//PUT /todos/:id
+app.put('/todos/:id', function (req,res) {
+    var body = _.pick(req.body, "description", "completed");
+    var validAttributes = {};
+    var todoId = parseInt(req.params.id, 10);
+    var matchedTodo = _.findWhere(todos, {id: todoId});
+
+    if (!matchedTodo) {
+       res.status(404).json({"error":"no todo item found with that id"}); 
+    }
+
+    if (body.hasOwnProperty('completed') && _.isBoolean(body.completed) ) {
+        validAttributes.completed = body.completed;
+    } else if (body.hasOwnProperty('completed')){
+        res.status(400).json({"error":"bad request (completed field) "});
+    } 
+    
+    if (body.hasOwnProperty('description') && _.isString(body.description) && body.description.trim().length > 0 ) {
+        validAttributes.description = body.description;
+    } else if (body.hasOwnProperty('description')){
+        res.status(400).json({"error":"bad request (description field)"});
+    } 
+
+    res.json(_.extend(matchedTodo, validAttributes));
+});
 
 app.listen(PORT, function(){
     console.log('Express listening on port: ' + PORT + '!');
