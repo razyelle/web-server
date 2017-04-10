@@ -36,6 +36,7 @@ app.post('/todos', function (req,res) {
 
     if (!_.isBoolean(body.completed) || !_.isString(body.description) 
     || body.description.trim().length === 0){
+        // || _.keys(body).length > 2
         return res.status(400).send();
     }
 
@@ -44,6 +45,20 @@ app.post('/todos', function (req,res) {
     todos.push(body);
     res.json(body);
 });
+
+//GET /todos/:id
+app.delete('/todos/:id', function(req,res){
+    var todoId = parseInt(req.params.id, 10);
+    var matchedTodo = _.findWhere(todos, {id: todoId});
+
+    if (!matchedTodo){
+        res.status(404).json({"error":"no todo item found with that ID"});
+    } else {
+        todos = _.without(todos, matchedTodo);
+        //todos.splice(todoId-1, 1);
+        res.json(matchedTodo);        
+    }
+})
 
 app.listen(PORT, function(){
     console.log('Express listening on port: ' + PORT + '!');
