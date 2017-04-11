@@ -17,6 +17,7 @@ app.get('/', function(req,res){
 app.get('/todos',function(req,res){
     var queryParams = req.query;
     var filteredTodos = todos;
+
     if (queryParams.hasOwnProperty('completed')) {
         if (queryParams.completed === 'true') {
             console.log('completed is true');
@@ -26,6 +27,25 @@ app.get('/todos',function(req,res){
             filteredTodos = _.where(filteredTodos, {completed: false});
         }        
     }
+   
+    if (queryParams.hasOwnProperty('q')) {    
+        if (queryParams.q.length > 0) {
+            filteredTodos = _.filter(filteredTodos, function(todo){
+            return todo.description.indexOf(queryParams.q) > -1;
+            });
+        };       
+    };
+
+    // .indexOf(work);
+    // if (queryParams.hasOwnProperty('completed')) {
+    //     if (queryParams.completed === 'true') {
+    //         console.log('completed is true');
+    //         filteredTodos = _.where(filteredTodos, {completed: true});
+    //     } else if (queryParams.completed === 'false') {
+    //         console.log('completed is false');
+    //         filteredTodos = _.where(filteredTodos, {completed: false});
+    //     }        
+    // }
     
     res.json(filteredTodos);
 });
