@@ -15,7 +15,19 @@ app.get('/', function(req,res){
 
 // GET /todos
 app.get('/todos',function(req,res){
-    res.json(todos);
+    var queryParams = req.query;
+    var filteredTodos = todos;
+    if (queryParams.hasOwnProperty('completed')) {
+        if (queryParams.completed === 'true') {
+            console.log('completed is true');
+            filteredTodos = _.where(filteredTodos, {completed: true});
+        } else if (queryParams.completed === 'false') {
+            console.log('completed is false');
+            filteredTodos = _.where(filteredTodos, {completed: false});
+        }        
+    }
+    
+    res.json(filteredTodos);
 });
 
 //GET /todos/:id
@@ -76,7 +88,7 @@ app.put('/todos/:id', function (req,res) {
     } else if (body.hasOwnProperty('completed')){
         res.status(400).json({"error":"bad request (completed field) "});
     } 
-    
+
     if (body.hasOwnProperty('description') && _.isString(body.description) && body.description.trim().length > 0 ) {
         validAttributes.description = body.description;
     } else if (body.hasOwnProperty('description')){
