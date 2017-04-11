@@ -31,7 +31,7 @@ app.get('/todos',function(req,res){
     if (queryParams.hasOwnProperty('q')) {    
         if (queryParams.q.length > 0) {
             filteredTodos = _.filter(filteredTodos, function(todo){
-            return todo.description.indexOf(queryParams.q) > -1;
+            return todo.description.toLowerCase().indexOf(queryParams.q.toLowerCase()) > -1;
             });
         };       
     };
