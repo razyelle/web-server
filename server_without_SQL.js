@@ -1,7 +1,6 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var _ = require('underscore');
-var db = require('./db.js');
 
 var app = express();
 var PORT = process.env.PORT || 3000;
@@ -66,33 +65,17 @@ app.get('/todos/:id',function(req,res){
 //POST /todos
 app.post('/todos', function (req,res) {
     var body = _.pick(req.body, "description", "completed");
-    // db.todo.create({
-    //     description: body.description.trim(),
-    //     completed: body.completed
-    //     }).then(function (todo) {
-    //         res.status(200).json(todo);
-    //     }, function (e) {
-    //         res.status(400).json(e);
-    //     })
 
-    db.todo.create(body).then(function (todo) {
-        res.status(200).json(todo.toJSON());
-    }, function (e) {
-        res.status(400).json(e);
-    })
+    if (!_.isBoolean(body.completed) || !_.isString(body.description) 
+    || body.description.trim().length === 0){
+        // || _.keys(body).length > 2
+        return res.status(400).send();
+    }
 
-
-
-    // if (!_.isBoolean(body.completed) || !_.isString(body.description) 
-    // || body.description.trim().length === 0){
-    //     // || _.keys(body).length > 2
-    //     return res.status(400).send();
-    // }
-
-    // body.description = body.description.trim();
-    // body.id = todoNextId++;
-    // todos.push(body);
-    // res.json(body);
+    body.description = body.description.trim();
+    body.id = todoNextId++;
+    todos.push(body);
+    res.json(body);
 });
 
 //DELETE /todos/:id
@@ -135,10 +118,6 @@ app.put('/todos/:id', function (req,res) {
     res.json(_.extend(matchedTodo, validAttributes));
 });
 
-db.sequelize.sync({
-    //force: true
-}).then(function(){
-    app.listen(PORT, function(){
+app.listen(PORT, function(){
     console.log('Express listening on port: ' + PORT + '!');
-    });
 });
