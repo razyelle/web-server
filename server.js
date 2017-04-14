@@ -16,39 +16,32 @@ app.get('/', function(req,res){
 
 // GET /todos
 app.get('/todos',function(req,res){
-    var queryParams = req.query;
-    var filteredTodos = todos;
+    var query = req.query;
+    var where = {};
 
-    if (queryParams.hasOwnProperty('completed')) {
-        if (queryParams.completed === 'true') {
-            console.log('completed is true');
-            filteredTodos = _.where(filteredTodos, {completed: true});
-        } else if (queryParams.completed === 'false') {
-            console.log('completed is false');
-            filteredTodos = _.where(filteredTodos, {completed: false});
-        }        
-    }
-   
-    if (queryParams.hasOwnProperty('q')) {    
-        if (queryParams.q.length > 0) {
-            filteredTodos = _.filter(filteredTodos, function(todo){
-            return todo.description.toLowerCase().indexOf(queryParams.q.toLowerCase()) > -1;
-            });
-        };       
+    if (query.hasOwnProperty('completed')) {
+        if (query.completed === 'true') {
+            where.completed = true;
+        } else if (query.completed === 'false') {
+            where.completed = false;
+        } 
     };
 
-    // .indexOf(work);
-    // if (queryParams.hasOwnProperty('completed')) {
-    //     if (queryParams.completed === 'true') {
-    //         console.log('completed is true');
-    //         filteredTodos = _.where(filteredTodos, {completed: true});
-    //     } else if (queryParams.completed === 'false') {
-    //         console.log('completed is false');
-    //         filteredTodos = _.where(filteredTodos, {completed: false});
-    //     }        
-    // }
-    
-    res.json(filteredTodos);
+    if (query.hasOwnProperty('q')) {
+        if (query.q.length > 0) {
+            where.description = {
+                $like: '%'+query.q+'%'
+            }
+        };
+    };
+
+    console.log({where});
+
+    db.todo.findAll({where: where}).then(function (todos) {
+        res.json(todos)
+    }, function (e) {
+        res.status(500).send();
+    })
 });
 
 //GET /todos/:id
@@ -75,20 +68,7 @@ app.post('/todos', function (req,res) {
         res.status(200).json(todo.toJSON());
     }, function (e) {
         res.status(400).json(e);
-    })
-
-
-
-    // if (!_.isBoolean(body.completed) || !_.isString(body.description) 
-    // || body.description.trim().length === 0){
-    //     // || _.keys(body).length > 2
-    //     return res.status(400).send();
-    // }
-
-    // body.description = body.description.trim();
-    // body.id = todoNextId++;
-    // todos.push(body);
-    // res.json(body);
+    });
 });
 
 //DELETE /todos/:id
@@ -102,8 +82,8 @@ app.delete('/todos/:id', function(req,res){
         todos = _.without(todos, matchedTodo);
         //todos.splice(todoId-1, 1);
         res.json(matchedTodo);        
-    }
-})
+    };
+});
 
 //PUT /todos/:id
 app.put('/todos/:id', function (req,res) {
