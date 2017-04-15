@@ -74,15 +74,56 @@ app.post('/todos', function (req,res) {
 //DELETE /todos/:id
 app.delete('/todos/:id', function(req,res){
     var todoId = parseInt(req.params.id, 10);
-    var matchedTodo = _.findWhere(todos, {id: todoId});
 
-    if (!matchedTodo){
-        res.status(404).json({"error":"no todo item found with that id"});
-    } else {
-        todos = _.without(todos, matchedTodo);
-        //todos.splice(todoId-1, 1);
-        res.json(matchedTodo);        
-    };
+    db.todo.destroy({  
+    where: { 
+        id: todoId
+     }
+    }).then(function (deletedRaws) {
+         if (deletedRaws>0) {
+            res.status(204).send();
+        }  else {
+            res.status(404).json({
+                error: 'No todo found with this id'
+            });
+        };            
+    }, function () {
+            res.status(500).send();
+    }).catch(function (e) {
+        res.status(500).send();
+    });
+
+
+
+
+//    db.todo.findById(todoId).then(function (todo) {
+//         if (!!todo) {
+//             db.pets.destory({  
+//             where: { name: 'Max' }
+//             })
+//         .then(deletedPet => {
+//         console.log(`Has the Max been deleted? 1 means yes, 0 means no: ${deletedPet}`);
+//         });
+//         console.log('todo found!');
+//         console.log(todo.toJSON());            
+//     } else {
+//         console.log('no todo found!');
+//     }
+//     }).catch(function(e) {
+//         console.log(e);
+//     });
+
+
+
+    // var matchedTodo = _.findWhere(todos, {id: todoId});
+
+    // if (!matchedTodo){
+    //     res.status(404).json({"error":"no todo item found with that id"});
+    // } else {
+    //     todos = _.without(todos, matchedTodo);
+    //     //todos.splice(todoId-1, 1);
+    //     res.json(matchedTodo);        
+    // };
 });
 
 //PUT /todos/:id
